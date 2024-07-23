@@ -11,17 +11,16 @@ def clean_string(text: str, removable_words : list | None  = None) -> str:
         text = text.replace(char, '')
     #--------------------------------#
     text = text.split()
-
     if removable_words != None:
         for word in removable_words:
             while word in text:
                 text.remove(word)
-    #--------------------------------#
-    string = ''
-    for word in text:
-        string += word + ' '
-    string = string[:-1]
-    return string
+        string = ''
+        for word in text:
+            string += word + ' '
+        string = string[:-1]
+        return string
+    return text
 
 
 if __name__=='__main__':
