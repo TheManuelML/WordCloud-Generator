@@ -10,8 +10,8 @@ def clean_string(text: str, removable_words : list | None  = None) -> str:
     for char in removable_chars:
         text = text.replace(char, '')
     #--------------------------------#
-    text = text.split()
     if removable_words != None:
+        text = text.split()
         for word in removable_words:
             while word in text:
                 text.remove(word)
