@@ -1,5 +1,6 @@
 import os
 import argparse
+import os.path
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,14 +8,15 @@ from PIL import Image
 from wordcloud import WordCloud
 from Modules.filter import clean_string
 
+
 # Arguments
 parser = argparse.ArgumentParser(add_help=False)
-parser.add_argument('-d', '--dir')
-parser.add_argument('-f', '--file')
+parser.add_argument('-p', '--path')
 parser.add_argument('-r', '--results')
 parser.add_argument('-m', '--mask')
 parser.add_argument('-s', '--stopwords')
 argument = parser.parse_args()
+
 
 # Transform
 ## Text file to one string
@@ -34,7 +36,7 @@ def stopwords_to_list(stopwords_path : str) -> list:
 
 ## Create Word Cloud
 def wordcloud(text : str, wordcloud_path : str, mask : str | None = None, stopwords : list | None = None) -> None:
-    wc = WordCloud(
+    wc = WordCloud( # Add more parameters if you want
         background_color = 'white', 
         max_words = 100, # Change this
         min_font_size = 8, # Change this
@@ -47,32 +49,38 @@ def wordcloud(text : str, wordcloud_path : str, mask : str | None = None, stopwo
     plt.close()
     return None
 
-# File and recursive functions
-## Recursive function to create WordClouds 
-def recursive(dir_path : str, wordcloud_path : str, mask : str | None = None, stopwords : list | None = None) -> None:
-    with os.scandir(dir_path) as files:
-        for txt in files:
-            if txt.is_file():
-                wc_name = txt.name[:-4] + '.png'
-                txt_path = os.path.join(dir_path, txt.name)
-                wc_path = os.path.join(wordcloud_path, wc_name)
-                # From txt to string
-                text = txt_to_string(txt_path)
-                # Creating Word Cloud
-                wordcloud(text, wc_path, mask, stopwords)
-    return None
 
-## Single function to create WordCloud
-def single(file_path : str, wordcloud_path : str, mask : str | None = None, stopwords : list | None = None) -> None:
+# File and recursive functions
+## File processing
+def file_processing(file_path : str, wordcloud_path : str, mask : str | None = None, stopwords : list | None = None) -> None:
     txt_name = os.path.basename(file_path)
-    wc_name = txt_name[:-4] + '.png'
-    txt_path = file_path
+    wc_name = txt_name[:-4] + '.jpg'
     wc_path = os.path.join(wordcloud_path, wc_name)
-    # From txt to string
-    text = txt_to_string(txt_path)
-    # Creating Word Cloud
+
+    text = txt_to_string(file_path)
     wordcloud(text, wc_path, mask, stopwords)
     return None
+
+## Directory processing
+def dir_processing(directory_path : str, wordcloud_path : str, mask : str | None = None, stopwords : list | None = None) -> None:
+    with os.scandir(directory_path) as first_level:
+        for element in first_level:
+            if os.path.isdir(element.path):
+                recursive(element.path, wordcloud_path, mask, stopwords)
+            elif os.path.isfile(element.path) and element.name.endswith('.txt'):
+                file_processing(element.path, wordcloud_path, mask, stopwords)
+    return None
+
+## Recursive
+def recursive(directory_path : str, wordcloud_path : str, mask : str | None = None, stopwords : list | None = None) -> None:
+    for element in os.listdir(directory_path):
+        full_path = os.path.join(directory_path, element)
+        if os.path.isdir(full_path):
+            recursive(full_path, wordcloud_path, mask, stopwords)
+        else:
+            file_processing(full_path, wordcloud_path, mask, stopwords)
+    return None
+
 
 # Main function
 def main() -> None:
@@ -82,7 +90,7 @@ def main() -> None:
     else:
         print('The results directory path is required!!!')
         sys.exit(1)
-    #------------------------------------------------------------#
+    
     ## Mask  & Stopwords for the Word Cloud
     if argument.mask:
         wc_mask = np.array(Image.open(argument.mask))
@@ -94,19 +102,19 @@ def main() -> None:
         stopwords = stopwords_to_list(stpwrds_path)
     else:
         stopwords = None
-    #------------------------------------------------------------#
+    
     ## Directory and file path
-    if argument.dir and argument.file:
-        print('Choose between a directory or a file path!!!')
+    if not argument.path:
+        print('Path argument is necesary!!!')
         sys.exit(1)
-    elif argument.dir:
-        dir_path = argument.dir
-        recursive(dir_path, wordcloud_path, wc_mask, stopwords)
-    elif argument.file:
-        file_path = argument.file
-        single(file_path, wordcloud_path, wc_mask, stopwords)
+    elif os.path.isdir(argument.path):
+        dir_path = argument.path
+        dir_processing(dir_path, wordcloud_path, wc_mask, stopwords)
+    elif os.path.isfile(argument.path):
+        file_path = argument.path
+        file_processing(file_path, wordcloud_path, wc_mask, stopwords)
     else:
-        print('The directory or file parameter is required!!!')
+        print('Write a valid path!!!')
         sys.exit(1)
     return None
 
