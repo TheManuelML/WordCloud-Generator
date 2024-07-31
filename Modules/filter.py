@@ -1,4 +1,3 @@
-
 def clean_string(text: str, removable_words : list | None  = None) -> str:
     text = text.lower()
     removable_chars = list('.,:;()/¿?!¡%$&_-@1234567890') # Add or remove special characters
@@ -21,7 +20,6 @@ def clean_string(text: str, removable_words : list | None  = None) -> str:
         string = string[:-1]
         return string
     return text
-
 
 if __name__=='__main__':
     print('This file is a module of the Word Cloud generator script. Execute the Word Cloud generator script to use this function.')
