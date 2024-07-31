@@ -6,11 +6,10 @@ It supports Windows and Unix OS.
 ## Usage
 Here is an example of how you can run this script:
 ```
->> python script.py -f .\\Path\\To\\File.txt -r \\Path\\To\\Directory\\ -s .\\Path\\To\\StopwordsFile.txt -m .\\Path\\To\\Mask.jpg
+>> python script.py -p .\\Path\\To\\File.txt -r \\Path\\To\\Directory\\ -s .\\Path\\To\\StopwordsFile.txt -m .\\Path\\To\\Mask.jpg
 ```
 ## Flags
-- -f -> Add path to a plain text file
-- -d -> Add path to a directory with plain text files
+- -p -> Add the path to a text file of a directory with text files
 - -r -> Add the path where you are going to store the WordCloud images
 - -m -> Mask of th WordCloud (shape)
 - -s -> List of words you want to exclude from the WordCloud
